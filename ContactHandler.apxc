@@ -1,0 +1,19 @@
+public class ContactHandler {
+	public static void handleDuplicate(List<Contact> newList)
+    {
+        String newPhone;
+        String newEmail;
+        for(Contact newCon : newList){
+            newPhone = newCon.MobilePhone;
+            newEmail = newCon.Email;
+        }
+       	List<Contact> countPhone = [Select Name, id from Contact where MobilePhone =: newPhone];
+        List<Contact> countEmail = [Select Name, id from Contact where Email =: newEmail];
+        if(countPhone.size() != 0)  
+         	for(Contact con : newList)
+            	con.addError('Duplicate contact'); 
+       if(countEmail.size() != 0)  
+         	for(Contact con : newList)
+            	con.addError('Duplicate Email'); 
+	}
+}
