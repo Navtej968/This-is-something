@@ -98,12 +98,18 @@ public class ContactHandler {
 
 
 
-//Handle CountRelatedContacts (doesnt work on changing account)
+//Handle CountRelatedContacts works for updation, deletion ,insertion
 
- public static void countRelatedContacts(List<Contact> newList){
+ public static void countRelatedContacts(List<Contact> newList , List<Contact> oldList){
         Set<Id> accIds  = new Set<Id>();
         for (Contact c: newList)  { 
-            accIds.add(c.AccountId);    
+            accIds.add(c.AccountId);
+        }
+        if(oldList != null)
+        {
+            for(Contact c : oldList){
+                accIds.add(c.AccountId);
+            }
         }
         List<Account> modAccounts = [Select Name,TotalContacts__c, (Select Id from Contacts)  from Account WHERE Id in: accIds ];
         List<Account> accountToUpdate = new List<Account>();
