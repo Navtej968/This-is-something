@@ -19,3 +19,80 @@ public class ContactHandler {
 }
 
 // okay bro 
+
+
+//
+//newer version:
+//
+
+
+public class ContactHandler {
+    public static void handleDuplicate(List<Contact> newList)
+    {
+        String newPhone;
+        String newEmail;
+        for(Contact newCon : newList){
+            newPhone = newCon.MobilePhone;
+            newEmail = newCon.Email;
+        }  
+        List<Contact> countPhone = [Select Name, id from Contact where MobilePhone =: newPhone];
+        List<Contact> countEmail = [Select Name, id from Contact where Email =: newEmail];
+        if(countPhone.size() != 0)
+            for(Contact con : newList)
+            con.addError('Duplicate contact');
+        if(countEmail.size() != 0) 
+            for(Contact con : newList)
+            con.addError('Duplicate Email'); 
+        if(newPhone.length()!=10)
+            for(Contact con : newList)
+            con.addError('Phone length is not valid');
+    }
+    public static void contactLimit(List<Contact> newList)
+    {
+        String AccId;
+        for(Contact con : newList)
+            AccId = con.AccountId;
+        List<Contact> l1 = [Select LastName from contact where AccountId =: AccId];
+        for(Contact con : newList)
+        {
+            if(l1.size() >=4)
+                con.addError('Cant make more than 4 contact on same account');
+        }
+    }
+    public static void copyContactToAccount(List<Contact> newList) {   
+        Map<Id, String> accIdToPhone = new Map<Id, String>();	
+        for (Contact con : newList) {
+            if (con.AccountId != null && con.MobilePhone != null) {
+                accIdToPhone.put(con.AccountId, con.MobilePhone);
+            }
+        System.debug(accIdToPhone);
+        }
+        List<Account> accountsToUpdate = new List<Account>();
+        for (Account acc : [SELECT Id, Phone FROM Account WHERE Id IN :accIdToPhone.keySet()]) {
+            acc.Phone = accIdToPhone.get(acc.Id);
+            accountsToUpdate.add(acc);
+        }
+        System.debug(accountsToUpdate);  
+        system.debug('do some ');
+        if (!accountsToUpdate.isEmpty()) {
+            update accountsToUpdate; 
+        }
+        
+    }
+    public static void countRelatedContacts(List<Contact> newList){
+        Set<Id> accIds  = new Set<Id>();
+        for (Contact c: newList)  { 
+            accIds.add(c.AccountId);    
+        }
+        List<Account> modAccounts = [Select Name,TotalContacts__c, (Select Id from Contacts)  from Account WHERE Id in: accIds ];
+        List<Account> accountToUpdate = new List<Account>();
+        for (Account a: modAccounts) {   
+            List<Contact> s = a.Contacts; 
+            a.TotalContacts__c = s.size();  
+            accountToUpdate.add(a);        
+        }
+        update accountToUpdate;
+        
+    }
+}
+
