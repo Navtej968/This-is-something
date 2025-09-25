@@ -1,0 +1,39 @@
+
+    public static void handleNumOfContact(List<Account> newList)
+    {
+        Set<Id> AccIds = new Set<Id>();
+        for(Account acc : newList)
+            AccIds.add(acc.Id);
+       	List<Account> accRelated = [SELECT id ,Name,Phone ,Num_of_Contacts__c,(SELECT id  from Contacts) FROM Account WHERE id IN :AccIds];
+        List<Contact> contactsToCreate = new List<Contact>();
+        List<Contact> contactsToDelete = new List<Contact>();
+        for(Account acc: accRelated)
+        {
+            integer requireCon = (integer)acc.Num_of_Contacts__c;
+            integer existingCon = acc.contacts.size();
+            if(requireCon < existingCon)
+            {
+                for(integer i = 0 ; i < (existingCon - requireCon) ; i++)
+                     contactsToDelete.add(acc.contacts[i]);	
+			}
+            else if(existingCon < requireCon)
+            {
+                integer toCreate = existingCon - requireCon;
+                if(toCreate < 0)
+                    toCreate = -1 * toCreate;
+                for(integer i = 0 ; i < toCreate ; i++){
+                    Contact con = new Contact();
+                    con.AccountId = acc.Id;
+                    con.LastName = acc.Name;
+                    con.Phone = acc.Phone;
+                    contactsToCreate.add(con);
+                }
+			}
+        }
+        if(!contactsToCreate.isEmpty())
+			insert contactsToCreate;
+		if(!contactsToDelete.isEmpty())
+            delete contactsToDelete;
+       	
+	}
+}
