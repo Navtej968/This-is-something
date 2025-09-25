@@ -18,9 +18,7 @@
 			}
             else if(existingCon < requireCon)
             {
-                integer toCreate = existingCon - requireCon;
-                if(toCreate < 0)
-                    toCreate = -1 * toCreate;
+                integer toCreate =requireCon - existingCon;
                 for(integer i = 0 ; i < toCreate ; i++){
                     Contact con = new Contact();
                     con.AccountId = acc.Id;
