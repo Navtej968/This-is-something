@@ -1,0 +1,28 @@
+    public static void handleAccountCreation(List<contact> newList)
+    {
+        List<Account> accountsToCreate = new List<Account>();
+        Map<Id, Account> contactToAccountMap = new Map<Id, Account>();
+        
+        for(Contact con : newList) {
+            Account acc = new Account();
+            acc.Name = con.FirstName != null && con.LastName != null ? con.FirstName + ' ' + con.LastName + 's Account': 'New Contact Account';
+            accountsToCreate.add(acc);
+            contactToAccountMap.put(con.Id, acc);
+        }
+        
+        if (!accountsToCreate.isEmpty()) {
+            insert accountsToCreate;
+            List<Contact> contactsToUpdate = new List<Contact>();
+            
+            Integer index = 0;
+            for (Contact con : newList) {
+                Contact conn = new contact();
+                conn.Id = con.Id;
+                conn.AccountId = contactToAccountMap.get(con.id).id;
+                contactsToUpdate.add(conn);
+                index++; 
+            }
+            
+            update contactsToUpdate;
+        }
+    }
